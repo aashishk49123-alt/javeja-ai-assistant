@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090d18">
+  <title>Javeja AI Assistant</title>
+  <style>
+    :root{--bg:#090d18;--panel:#111827;--panel2:#172033;--text:#eef3ff;--muted:#9ba9c4;--accent:#7c5cff;--accent2:#23c9d7;--line:#27334a}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#1b2050 0,transparent 38%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+    .app{max-width:820px;margin:auto;min-height:100vh;display:flex;flex-direction:column;padding:16px}
+    header{display:flex;align-items:center;gap:12px;padding:8px 0 18px;border-bottom:1px solid var(--line)}
+    .logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:23px;font-weight:800;box-shadow:0 8px 30px #7c5cff40}
+    h1{font-size:20px;margin:0}.sub{font-size:12px;color:var(--muted);margin-top:3px}.status{margin-left:auto;color:#75e5b1;font-size:12px;white-space:nowrap}
+    .hero{text-align:center;padding:28px 8px 20px}.orb{width:92px;height:92px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#b5a6ff,#6b4cff 48%,#172d72 75%);box-shadow:0 0 45px #7c5cff50;font-size:39px}.hero h2{margin:0 0 8px;font-size:25px}.hero p{margin:0;color:var(--muted);font-size:14px}
+    .quick{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0 20px}.quick button{border:1px solid var(--line);background:#121a2b;color:var(--text);border-radius:999px;padding:10px 13px;font-size:13px}
+    #chat{display:flex;flex-direction:column;gap:12px;flex:1;padding:8px 0 18px}.msg{max-width:90%;padding:13px 15px;border-radius:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:5px}.user{align-self:flex-end;background:linear-gradient(135deg,#6847e8,#4d66d8);border-bottom-right-radius:5px}.msg small{display:block;color:#c4cce0;font-size:10px;margin-bottom:4px}
+    .composer{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 18%);padding:14px 0 8px}.inputrow{display:flex;align-items:flex-end;gap:8px;padding:8px;border:1px solid #35415d;background:#111827;border-radius:20px;box-shadow:0 8px 30px #0003}.inputrow textarea{flex:1;resize:none;max-height:120px;min-height:42px;background:transparent;color:var(--text);border:0;outline:0;padding:11px 7px;font:inherit}.iconbtn,.send{border:0;cursor:pointer;border-radius:14px;min-width:43px;height:43px;color:white;font-size:18px}.iconbtn{background:#26324b}.send{background:linear-gradient(135deg,var(--accent),#4d7cff);font-size:15px;font-weight:700;padding:0 15px}.hint{text-align:center;color:var(--muted);font-size:11px;margin-top:9px}.tools{display:flex;justify-content:center;gap:8px;margin:10px 0}.tools button{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 10px;border-radius:10px;font-size:12px}
+    a{color:#a99aff}.warn{color:#ffcf82}.hidden{display:none}
+    @media(min-width:650px){.app{padding:22px}.hero{padding-top:34px}.orb{width:100px;height:100px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">J</div>
+    <div><h1>Javeja AI</h1><div class="sub">आपका पर्सनल वॉइस असिस्टेंट</div></div>
+    <div class="status">● तैयार</div>
+  </header>
+
+  <section class="hero">
+    <div class="orb">✦</div>
+    <h2>नमस्ते! मैं Javeja हूँ</h2>
+    <p>मुझसे हिंदी या English में बात करें। मैं आपकी मदद करने की कोशिश करूँगा।</p>
+  </section>
+
+  <div class="quick">
+    <button data-prompt="भारत के बारे में रोचक जानकारी बताओ">🌍 दुनिया की जानकारी</button>
+    <button data-prompt="मुझे आज कुछ नया सीखाओ">💡 कुछ नया सीखो</button>
+    <button data-prompt="मुझे एक छोटी मजेदार कहानी सुनाओ">📖 कहानी सुनाओ</button>
+    <button data-prompt="मुझे अंग्रेज़ी सीखने में मदद करो">🗣️ English सीखो</button>
+  </div>
+
+  <main id="chat" aria-live="polite">
+    <div class="msg bot"><small>JAVEJA</small>नमस्ते! नीचे अपना सवाल लिखें या 🎙️ माइक्रोफ़ोन दबाकर बोलें। अभी यह शुरुआती डेमो है; असली AI जवाबों के लिए बाद में सुरक्षित AI बैकएंड जोड़ना होगा।</div>
+  </main>
+
+  <div class="tools">
+    <button id="searchBtn">🔎 इंटरनेट पर खोजें</button>
+    <button id="voiceToggle">🔊 आवाज़: चालू</button>
+    <button id="clearBtn">🧹 चैट साफ़ करें</button>
+  </div>
+
+  <section class="composer">
+    <div class="inputrow">
+      <button class="iconbtn" id="micBtn" title="बोलकर पूछें" aria-label="बोलकर पूछें">🎙️</button>
+      <textarea id="question" rows="1" placeholder="यहाँ सवाल लिखें..."></textarea>
+      <button class="send" id="sendBtn">भेजें ➤</button>
+    </div>
+    <div class="hint">Enter = भेजें · Shift + Enter = नई लाइन</div>
+  </section>
+</div>
+<script>
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('question');
+  let speakEnabled = true;
+  let searchMode = false;
+
+  function addMessage(text, who='bot', html=false) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + who;
+    if (who === 'bot') {
+      const label = document.createElement('small');
+      label.textContent = 'JAVEJA';
+      el.appendChild(label);
+    }
+    if (html) el.insertAdjacentHTML('beforeend', text);
+    else el.appendChild(document.createTextNode(text));
+    chat.appendChild(el);
+    el.scrollIntoView({behavior:'smooth', block:'end'});
+    return el;
+  }
+  function speak(text) {
+    if (!speakEnabled || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = /[\u0900-\u097F]/.test(text) ? 'hi-IN' : 'en-IN';
+    utter.rate = 1;
+    window.speechSynthesis.speak(utter);
+  }
+  function localReply(q) {
+    const s = q.toLowerCase();
+    if (/(नमस्ते|नमस्कार|hello|hi\b|hey)/i.test(s)) return 'नमस्ते! 😊 मैं Javeja हूँ। आप मुझसे क्या जानना चाहते हैं?';
+    if (/(तुम कौन|आप कौन|who are you|तुम्हारा नाम)/i.test(s)) return 'मेरा नाम Javeja AI है। यह मेरा शुरुआती डेमो है, जिसे हम आगे वॉइस और AI सुविधाओं से बेहतर बनाएँगे।';
+    if (/(समय|time)/i.test(s)) return 'आपके डिवाइस के अनुसार अभी समय ' + new Date().toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'}) + ' है।';
+    if (/(तारीख|date|आज कौन सा दिन)/i.test(s)) return 'आज की तारीख ' + new Date().toLocaleDateString('hi-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) + ' है।';
+    if (/(मजेदार कहानी|कहानी|story)/i.test(s)) return 'एक दिन एक छोटे रोबोट ने पूछा, “मैं दुनिया कैसे बदलूँ?” वैज्ञानिक ने कहा, “पहले किसी एक इंसान की मदद करो।” रोबोट ने सबका काम आसान करना शुरू किया—और यही उसकी सबसे बड़ी खोज बनी। 🤖';
+    if (/(अंग्रेज़ी|english)/i.test(s)) return 'आज का आसान English वाक्य: “Could you please help me?” इसका अर्थ है: “क्या आप कृपया मेरी मदद कर सकते हैं?” इसे 3 बार बोलकर अभ्यास करें।';
+    if (/(भारत|india|दुनिया|world)/i.test(s)) return 'भारत दक्षिण एशिया का देश है। इसकी राजधानी नई दिल्ली है और यहाँ अनेक भाषाएँ, संस्कृतियाँ और परंपराएँ हैं। ताज़ा या विस्तृत जानकारी के लिए “इंटरनेट पर खोजें” दबाएँ।';
+    if (/(मदद|help|क्या कर सकते)/i.test(s)) return 'मैं इस डेमो में बोलकर सवाल लेना, कुछ बुनियादी जवाब देना, समय/तारीख बताना और वेब सर्च खोलना कर सकता हूँ। असली AI बातचीत के लिए हमें आगे AI API को सुरक्षित सर्वर से जोड़ना होगा।';
+    return 'मैंने आपका सवाल समझने की कोशिश की: “' + q + '”\n\nयह अभी शुरुआती डेमो है, इसलिए मेरे पास हर सवाल का असली AI जवाब नहीं है। आप “इंटरनेट पर खोजें” दबाकर वेब पर जानकारी ढूँढ सकते हैं। आगे हम इसमें AI बैकएंड जोड़ेंगे।';
+  }
+  function sendQuestion(text) {
+    const q = (text ?? input.value).trim();
+    if (!q) return;
+    addMessage(q, 'user');
+    input.value = '';
+    input.style.height = 'auto';
+    if (searchMode) {
+      searchMode = false;
+      const url = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+      addMessage('आपकी खोज खोल रहा हूँ: ' + url, 'bot', true);
+      const link = document.createElement('a');
+      link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+      link.textContent = 'Google पर खोज के परिणाम खोलें';
+      chat.lastElementChild.appendChild(document.createElement('br'));
+      chat.lastElementChild.appendChild(link);
+      return;
+    }
+    const answer = localReply(q);
+    setTimeout(() => { addMessage(answer); speak(answer); }, 250);
+  }
+  document.getElementById('sendBtn').addEventListener('click', () => sendQuestion());
+  input.addEventListener('input', () => { input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px'; });
+  input.addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey){e.preventDefault();sendQuestion();} });
+  document.querySelectorAll('[data-prompt]').forEach(b => b.addEventListener('click', () => sendQuestion(b.dataset.prompt)));
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    searchMode = true; input.placeholder = 'इंटरनेट पर क्या खोजना है?'; input.focus();
+    addMessage('वेब सर्च मोड चालू है। अब अपना खोजने वाला सवाल लिखें और भेजें।', 'bot');
+  });
+  document.getElementById('voiceToggle').addEventListener('click', e => {
+    speakEnabled = !speakEnabled; e.currentTarget.textContent = speakEnabled ? '🔊 आवाज़: चालू' : '🔇 आवाज़: बंद';
+    if(!speakEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  });
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    chat.replaceChildren();
+    addMessage('चैट साफ़ हो गई। नमस्ते! अपना सवाल लिखें या बोलें।');
+  });
+  document.getElementById('micBtn').addEventListener('click', () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { addMessage('इस ब्राउज़र में वॉइस पहचान उपलब्ध नहीं है। Android पर Chrome में खोलकर देखें या सवाल टाइप करें।'); return; }
+    const rec = new SR(); rec.lang = 'hi-IN'; rec.interimResults = false; rec.maxAlternatives = 1;
+    document.getElementById('micBtn').textContent = '⏺️';
+    rec.onresult = e => { input.value = e.results[0][0].transcript; sendQuestion(); };
+    rec.onerror = () => addMessage('माइक्रोफ़ोन नहीं चल पाया। ब्राउज़र की microphone permission जाँचें या सवाल टाइप करें।');
+    rec.onend = () => { document.getElementById('micBtn').textContent = '🎙️'; };
+    try { rec.start(); } catch(err) { addMessage('माइक्रोफ़ोन शुरू नहीं हो पाया। कृपया दोबारा कोशिश करें।'); }
+  });
+</script>
+</body>
+</html>
